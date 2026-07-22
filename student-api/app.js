@@ -2,53 +2,51 @@ require("dotenv").config();
 
 const connectDB = require("./config/db");
 
-const {
-  createStudent,
-  getAllStudents,
-  getStudentById,
-  updateStudent,
-  deleteStudent,
-} = require("./services/studentService");
+const Department = require("./models/Department");
+const Employee = require("./models/Employee");
 
 const run = async () => {
   await connectDB();
 
-  // Create Student
-  const student = await createStudent({
-    name: "Rahul",
-    email: "rahul@example.com",
-    age: 22,
-    course: "Node.js",
+  // Create Department
+  const department = await Department.create({
+    name: "Computer Science",
+    building: "Block A",
   });
 
-  console.log("Created:");
-  console.log(student);
+  console.log("Department Created");
+  console.log(department);
 
-  // Get All Students
-  const students = await getAllStudents();
+  // Create Employees
+  await Employee.create([
+    {
+      name: "Rahul",
+      salary: 50000,
+      department: department._id,
+    },
+    {
+      name: "Priya",
+      salary: 60000,
+      department: department._id,
+    },
+  ]);
 
-  console.log("\nAll Students:");
-  console.log(students);
+  console.log("Employees Created");
 
-  // Get Student By ID
-  const oneStudent = await getStudentById(student._id);
+  // Populate all department details
+  const employees = await Employee.find().populate("department");
 
-  console.log("\nStudent By ID:");
-  console.log(oneStudent);
+  console.log("\nEmployees with Department");
+  console.log(employees);
 
-  // Update Student
-  const updated = await updateStudent(student._id, {
-    course: "MongoDB",
-  });
+  // Populate only department name
+  const employeeNames = await Employee.find().populate(
+    "department",
+    "name"
+  );
 
-  console.log("\nUpdated Student:");
-  console.log(updated);
-
-  // Delete Student
-  const deleted = await deleteStudent(student._id);
-
-  console.log("\nDeleted Student:");
-  console.log(deleted);
+  console.log("\nDepartment Name Only");
+  console.log(employeeNames);
 
   process.exit();
 };
